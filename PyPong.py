@@ -34,7 +34,7 @@ def text_obj(text, font):
 
 #Mostrar texto na tela
 def message_display(text):
-    LARGETEXT = pygame.font.Font('bitman.ttf', 60)
+    LARGETEXT = pygame.font.Font('bitman.TTF', 60)
     TEXTSURF, TEXT_RECT = text_obj(text, LARGETEXT)
     TEXT_RECT.center = ((SIZE_WIDTH/2), (SIZE_HEIGHT/2))
     DISPLAYSURF.blit(TEXTSURF, TEXT_RECT)
@@ -88,7 +88,7 @@ class Paddle(pygame.sprite.Sprite):
         if self.player_number == 1:
             if (UP1 == True) and (self.rect.y > 5):
                 self.rect.y -= self.speed
-            elif (DOWN1 == True) and (self.rect.bottom < WINDOW_HEIGHT - 5):
+            elif (DOWN1 == True) and (self.rect.bottom < SIZE_HEIGHT - 5):
                 self.rect.y += self.speed
             elif (NO_MOVEMENT1 == True):
                 pass
@@ -96,7 +96,7 @@ class Paddle(pygame.sprite.Sprite):
         if self.player_number == 2:
             if (UP2 == True) and (self.rect.y > 5):
                 self.rect.y -= self.speed
-            elif (DOWN2 == True) and (self.rect.bottom < WINDOW_HEIGHT - 5):
+            elif (DOWN2 == True) and (self.rect.bottom < SIZE_HEIGHT - 5):
                 self.rect.y += self.speed
             elif (NO_MOVEMENT2 == True):
                 pass
@@ -213,7 +213,7 @@ def button(msg,posx,posy,width,height,inactivecolor, activecolor, action=None):
     else:
         pygame.draw.rect(DISPLAYSURF, inactivecolor, (posx, posy, width, height))
 
-    MEDIUMFONT = pygame.font.Font('bitman.ttf', 20)
+    MEDIUMFONT = pygame.font.Font('bitman.TTF', 20)
     TEXT = MEDIUMFONT.render(msg, True, BLACK)
     TEXT_RECT = TEXT.get_rect()
     TEXT_RECT.center = ((posx + (width/2)), (posy + (height/2)))
@@ -231,7 +231,7 @@ def game_intro():
                 quit()
 
         DISPLAYSURF.fill(BLACK)
-        FONT = pygame.font.Font('bitman.ttf', 60)
+        FONT = pygame.font.Font('bitman.TTF', 60)
         NAME = FONT.render('PYPONG', True, WHITE, BLACK)
         NAME_RECT = NAME.get_rect()
         NAME_RECT.center = (400, 150)
@@ -273,7 +273,7 @@ def game_multi():
 
     while True:
         for event in pygame.event.get():
-            if event.type == QUIT:
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
