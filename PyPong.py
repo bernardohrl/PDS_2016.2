@@ -104,9 +104,9 @@ def pypong_intro():
         makeObject(10, 570, 780, 10, WHITE)
 
         makeButton("CLASSIC",      20, 275, 300, 250, 30, WHITE, GRAY, pypong_classic)
-        makeButton("DOUBLE",       20, 275, 350, 250, 30, WHITE, GRAY)
+        makeButton("DOUBLE",       20, 275, 350, 250, 30, WHITE, GRAY, pypong_double)
         makeButton("MULTI BALL",   20, 275, 400, 250, 30, WHITE, GRAY, pypong_multiball)
-        makeButton("CANNON",       20, 275, 450, 250, 30, WHITE, GRAY)
+        makeButton("CANNON",       20, 275, 450, 250, 30, WHITE, GRAY, pypong_cannon)
         makeButton("INSTRUCTIONS", 10, 315, 530, 170, 20, WHITE, GRAY, pypong_instructions)
 
         pygame.display.update()
@@ -411,6 +411,308 @@ def pypong_classic():
             makeButton("MAIN MENU", 10, 315, 530, 170, 20, WHITE, GRAY, pypong_intro)
 
         pygame.display.update()
+
+#Criar Double Pong
+def pypong_double():
+    global pause
+    pygame.display.set_caption('Double Pong')
+    # Definição dos jogadores vertical
+    playery = pygame.Surface((15, 90))
+    playery1 = playery.convert()
+    playery1.fill((255, 255, 255))
+    playery2 = playery.convert()
+    playery2.fill((255, 255, 255))
+    # Definição dos jogadores horizontal
+    playerx = pygame.Surface((90, 15))
+    playerx1 = playerx.convert()
+    playerx1.fill((255, 255, 255))
+    playerx2 = playerx.convert()
+    playerx2.fill((255, 255, 255))
+    # Blackground
+    back = pygame.Surface((800, 600))
+    background = back.convert()
+    background.fill((0, 0, 0))
+    # Definição da bola
+    circ_sur = pygame.Surface((15, 15))
+    circ = pygame.draw.circle(circ_sur, (255, 255, 255), (7, 7), 7)
+    circle = circ_sur.convert()
+    circle.set_colorkey((0, 0, 0))
+    playerymove1, playerymove2, playerxmove1, playerxmove2 = 0., 0., 0., 0.
+    circle_x, circle_y = 400., 300.
+    # Velocidade Aleatória
+    speed_x, speed_y, speed_circ = random.randint(170, 250) * (-1) ** random.randrange(2), random.randint(170, 250) * (-1) ** random.randrange(2), 250. * (-1) ** random.randrange(2)
+    player1_score, player2_score = 0, 0
+    # Clock
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("calibri", 40)
+    # Outras definições
+    playery1_x, playery2_x = 10., 775.
+    playery1_y, playery2_y = DISPLAYSURF.get_rect().centery, DISPLAYSURF.get_rect().centery
+    playerx1_x, playerx2_x = DISPLAYSURF.get_rect().centerx, DISPLAYSURF.get_rect().centerx
+    playerx1_y, playerx2_y = 575., 10.
+
+    # Criação dos jogadores
+    class Paddley(pygame.sprite.Sprite):
+        def __init__(self, player_number):
+            pygame.sprite.Sprite.__init__(self)
+            self.player_number = player_number
+            self.image = pygame.Surface([15, 90])
+            self.image.fill(WHITE)
+            self.rect = self.image.get_rect()
+            self.speed = 10
+            if self.player_number == 1:
+                self.rect.centerx = DISPLAYSURF.get_rect().left
+                self.rect.centerx += 7.5
+            elif self.player_number == 2:
+                self.rect.centerx = DISPLAYSURF.get_rect().right
+                self.rect.centerx -= 7.5
+            self.rect.centery = DISPLAYSURF.get_rect().centery
+
+    class Paddlex(pygame.sprite.Sprite):
+        def __init__(self, player_number):
+            pygame.sprite.Sprite.__init__(self)
+            self.player_number = player_number
+            self.image = pygame.Surface([100, 10])
+            self.image.fill(WHITE)
+            self.rect = self.image.get_rect()
+            self.speed = 10
+            if self.player_number == 1:
+                self.rect.centery = DISPLAYSURF.get_rect().bottom
+                self.rect.centery += 7.5
+            elif self.player_number == 2:
+                self.rect.centery = DISPLAYSURF.get_rect().top
+                self.rect.centery -= 7.5
+            self.rect.centerx = DISPLAYSURF.get_rect().centerx
+
+    paddle1 = Paddley(1)
+    paddle2 = Paddley(2)
+    paddle3 = Paddlex(1)
+    paddle4 = Paddlex(2)
+
+    # Jogo
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            # Teclas de comando
+            if event.type == pygame.KEYDOWN:
+                if event.key == K_UP:
+                    playerymove2 = -10
+                elif event.key == K_DOWN:
+                    playerymove2 = 10
+                elif event.key == K_w:
+                    playerymove1 = -10
+                elif event.key == K_s:
+                    playerymove1 = 10
+                elif event.key == K_d:
+                    playerxmove2 = 10
+                elif event.key == K_a:
+                    playerxmove2 = -10
+                elif event.key == K_RIGHT:
+                    playerxmove1 = 10
+                elif event.key == K_LEFT:
+                    playerxmove1 = -10
+                elif event.key == K_SPACE:
+                    # condição para pausar
+                    pause = True
+                    paused()
+
+            # Não deixa os jogadores permanecer no movimento
+            if event.type == pygame.KEYUP:
+                if event.key == K_UP or event.key == K_DOWN:
+                    playerymove1 = playerymove2 = 0
+                if event.key == K_w or event.key == K_s:
+                    playerymove1 = playerymove2 = 0
+                if event.key == K_LEFT or event.key == K_RIGHT:
+                    playerxmove1 = playerxmove2 = 0
+                if event.key == K_a or event.key == K_d:
+                    playerxmove1 = playerxmove2 = 0
+
+        playery1_y += playerymove1
+        playery2_y += playerymove2
+        playerx1_x += playerxmove1
+        playerx2_x += playerxmove2
+
+
+        # Objetos de superfície
+        DISPLAYSURF.blit(background, (0, 0))
+        DISPLAYSURF.blit(playery1, (playery1_x, playery1_y))
+        DISPLAYSURF.blit(playery2, (playery2_x, playery2_y))
+        DISPLAYSURF.blit(playerx1, (playerx1_x, playerx1_y))
+        DISPLAYSURF.blit(playerx2, (playerx2_x, playerx2_y))
+        DISPLAYSURF.blit(circle, (circle_x, circle_y))
+
+        # Movimento da bola
+        time_passed = clock.tick(30)
+        time_sec = time_passed / 1000.0
+
+        circle_x += speed_x * time_sec
+        circle_y += speed_y * time_sec
+        # Definição dos escores
+        score(player1_score, player2_score)
+        # Define limites para os pladdles
+        if playery1_y >= 485.:
+            playery1_y = 485.
+        elif playery1_y <= 25.:
+            playery1_y = 25.
+        if playery2_y >= 485.:
+            playery2_y = 485.
+        elif playery2_y <= 25.:
+            playery2_y = 25.
+
+        if playerx1_x >= 685.:
+            playerx1_x = 685.
+        elif playerx1_x <= 25.:
+            playerx1_x = 25.
+        if playerx2_x > 685.:
+            playerx2_x = 685.
+        elif playerx2_x <= 25.:
+            playerx2_x = 25.
+
+        # Colisão da bola
+        if circle_x <= playery1_x + 15 and circle_y >= playery1_y - 15 and circle_y <= playery1_y + 90:
+            speed_x = -speed_x
+            speed_y += 1 * random.randint(5,20)
+        if circle_x + 15 >= playery2_x and circle_y >= playery2_y - 15 and circle_y <= playery2_y + 90:
+            speed_x = -speed_x
+            speed_y += 1 * random.randint(5,20)
+        if circle_y + 15 >= playerx1_y and circle_x >= playerx1_x - 15 and circle_x <= playerx1_x + 90:
+            speed_y = -speed_y
+            speed_x += 1 * random.randint(5,20)
+        if circle_y <= playerx2_y + 15 and circle_x >= playerx2_x - 15 and circle_x <= playerx2_x + 90:
+            speed_y = -speed_y
+            speed_x += 1 * random.randint(5,20)
+        #Contagem dos pontos
+        if circle_x < 18.:
+            player2_score += 1
+            circle_x, circle_y = 400., 300
+            speed_x, speed_y, speed_circ = random.randint(170, 250) * (-1) ** random.randrange(2), 50 + random.randint(-170, 170) * (-1) ** random.randrange(2), 250. * (-1) ** random.randrange(2)
+            playery1_y, playery2_y, playerx1_x, playerx2_x = 300., 300., 400., 400.
+            pygame.display.update()
+
+        elif circle_x + 15 > 782.:
+            player1_score += 1
+            circle_x, circle_y = 400, 300
+            speed_x, speed_y, speed_circ = random.randint(170, 250) * (-1) ** random.randrange(2), 50 + random.randint(-170, 170) * (-1) ** random.randrange(2), 250. * (-1) ** random.randrange(2)
+            playery1_y, playery2_y, playerx1_x, playerx2_x = 300., 300., 400., 400.
+            pygame.display.update()
+            clock.tick(30)
+
+        if circle_y < 18.:
+            player2_score += 1
+            circle_x, circle_y = 400, 300
+            speed_x, speed_y, speed_circ = random.randint(170, 250) * (-1) ** random.randrange(2), 50 + random.randint(-170, 170) * (-1) ** random.randrange(2), 250. * (-1) ** random.randrange(2)
+            playery1_y, playery2_y, playerx1_x, playerx2_x = 300., 300., 400., 400.
+            pygame.display.update()
+            clock.tick(30)
+
+        elif circle_y + 15 > 582.:
+            player1_score += 1
+            circle_x, circle_y = 400., 300
+            speed_x, speed_y, speed_circ = random.randint(170, 250) * (-1) ** random.randrange(2), 50 + random.randint(-170, 170) * (-1) ** random.randrange(2), 250. * (-1) ** random.randrange(2)
+            playery1_y, playery2_y, playerx1_x, playerx2_x = 300., 300., 400., 400.
+            pygame.display.update()
+
+        # Checando o vencedor
+        if player1_score >= 10 or player2_score >= 10:
+            if player1_score >= 10:
+                makeText('PLAYER 1', WHITE, 30, 200, 230)
+                makeText('WINS', WHITE, 30, 200, 270)
+                makeText('PLAYER 2', WHITE, 30, 600, 230)
+                makeText('LOSES', WHITE, 30, 600, 270)
+                makeText('Total Score: ' + str(player1_score), WHITE, 15, 200, 320)
+                makeText('Total Score: ' + str(player2_score), WHITE, 15, 600, 320)
+            elif player2_score >= 10:
+                makeText('PLAYER 2', WHITE, 30, 600, 230)
+                makeText('WINS', WHITE, 30, 600, 270)
+                makeText('PLAYER 1', WHITE, 30, 200, 230)
+                makeText('LOSES', WHITE, 30, 200, 270)
+                makeText('Total Score: ' + str(player1_score), WHITE, 15, 200, 320)
+                makeText('Total Score: ' + str(player2_score), WHITE, 15, 600, 320)
+            circle_x, circle_y = 400, 300
+            makeButton("PLAY AGAIN", 10, 315, 500, 170, 20, WHITE, GRAY, pypong_double)
+            makeButton("MAIN MENU", 10, 315, 530, 170, 20, WHITE, GRAY, pypong_intro)
+        pygame.display.update()
+
+
+def pypong_cannon():
+    SIZE = WIDTH, HEIGHT = 640, 480
+    screen = pygame.display.set_mode(SIZE)
+    pygame.display.set_caption("Cannon")
+
+    clock = pygame.time.Clock()
+    fps = 30
+    # declaring colors
+    BLACK, WHITE = (0, 0, 0), (255, 255, 255)
+
+    # the paddle for the player
+    class Player1(pygame.sprite.Sprite):
+        def __init__(self, x, y):
+            super(Player1, self).__init__()
+            self.image = pygame.Surface((8, 85))
+            self.image.fill(WHITE)
+            self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y = x, y
+            self.score = 0
+
+        def movement(self):
+            k = pygame.key.get_pressed()
+            if k[pygame.K_w]:
+                if self.rect.y > 0:
+                    self.rect.y -= 16
+            if k[pygame.K_s]:
+                if self.rect.y + 64 < 460:
+                    self.rect.y += 16
+
+    # incomplete ball class
+    class Ball(pygame.sprite.Sprite):
+        def __init__(self, x, y):
+            super(Ball, self).__init__()
+            self.image = pygame.Surface((8, 8))
+            self.image.fill(WHITE)
+            self.rect = self.image.get_rect()
+            self.rect.x, self.rect.y = x, y
+
+            self.sx, self.sy = 8, 8
+
+        def movement(self):
+
+            if self.rect.x <= 0:
+                self.sx *= -1
+                self.rect.x = 1
+            elif self.rect.x >= HEIGHT - 8:
+                self.sx *= -1
+                self.rect.x = HEIGHT - 9
+
+            self.rect.x += self.sx
+            self.rect.y += self.sy
+
+            # def collisions(self):
+            # no definition yet
+
+    p1 = Player1(0, 0)
+    b = Ball(540, 230)
+
+    draw_list = pygame.sprite.Group()
+    draw_list.add(p1, b)
+
+    while True:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        screen.fill(BLACK)
+        draw_list.draw(screen)
+        # Below drawing the rectangle i.e The Cannon
+        pygame.draw.rect(screen, WHITE, (540, 200, 100, 70))
+        p1.movement()
+        b.movement()
+        # b.collisions()
+        pygame.display.flip()
+        clock.tick(fps)
 
 
 pypong_intro()
